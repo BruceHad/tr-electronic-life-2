@@ -96,6 +96,14 @@ var legend = {
 };
 
 function Wall() {} // Wall is an empty object, with no act method
+Wall.prototype.draw = function(ctx, v, squareSize) {
+    // Draw critter on ctx at vector v
+    // Wall is a filled rectangle that almost fills the square
+    var x = v.x * squareSize + 1, 
+        y = v.y * squareSize + 1,
+        width = squareSize - 1;
+    ctx.fillRect(x, y, width, width);
+};
 
 function BouncingCritter() {
     // this critter moves in a random direction until it hits a wall
@@ -107,10 +115,18 @@ BouncingCritter.prototype.act = function(view) {
         this.direction = view.find(" ") || "s"; // s if no spaces found
     return { type: "move", direction: this.direction };
 };
+BouncingCritter.prototype.draw = function(ctx, v) {
+    // Draw critter on ctx at vector v
+    // console.log(ctx, v);  
+};
 
 function WallFollower() {
     this.dir = "s";
 }
+WallFollower.prototype.draw = function(ctx, v) {
+    // Draw critter on ctx at vector v
+    // console.log(ctx, v);  
+};
 
 WallFollower.prototype.act = function(view) {
     var start = this.dir;
@@ -123,15 +139,33 @@ WallFollower.prototype.act = function(view) {
     return { type: "move", direction: this.dir };
 };
 
+/* Canvas will hold all the functions for drawing 
+ */
+function Canvas(id, height, width) {
+    var canvas = document.getElementById(id);
+    this.squareSize = 8;
+    this.ctx = canvas.getContext('2d');
+    
+    canvas.height = height * this.squareSize;
+    canvas.width = width * this.squareSize;
+}
+
+Canvas.prototype.draw = function(element, vector) {
+    //draw element to canvas at vector
+    // console.log(element);
+    element.draw(this.ctx, vector, this.squareSize);
+};
+
 /* The World object take the plan and a legend and constructs all the World
     objects.
 */
 
 function World(map, legend) {
+    this.legend = legend;
     this.grid = new Grid(map[0].length, map.length);
     var grid = this.grid; // make grid available in forEach
-    this.legend = legend;
-
+    this.canvas = new Canvas('canvas', grid.height, grid.width);
+    //poulate the grid
     map.forEach(function(line, y) {
         for (var x = 0; x < line.length; x++) {
             grid.set(new Vector(x, y),
@@ -151,6 +185,16 @@ World.prototype.toString = function() {
     return output;
 };
 
+World.prototype.toCanvas = function(){
+    for (var y = 0; y < this.grid.height; y++) {
+        for (var x = 0; x < this.grid.width; x++) {
+            var vector = new Vector(x, y);
+            var element = this.grid.get(vector);
+            if(element)
+                this.canvas.draw(element, vector);
+        }
+    }
+};
 /* The turn method gives the critter the chance to act.*/
 World.prototype.turn = function() {
     var acted = [];
@@ -211,38 +255,35 @@ View.prototype.find = function(ch) {
 
 
 
-
-/* Test out the code */
-// var grid = new Grid(5, 5);
-// grid.set(new Vector(1, 1), "X");
-// console.log(grid.get(new Vector(1, 1)));
 // The plan represents the world's grid
 var plan = [
     "###########################",
     "#                         #",
     "# ####                    #",
-    "#    #                    #",
-    "#    #                    #",
+    "#    #         o          #",
+    "#    #            o       #",
     "#    #####                #",
-    "#                         #",
+    "#              ~          #",
     "#    #################    #",
     "#                    #    #",
     "#                    #    #",
     "#              #######    #",
-    "#                         #",
-    "#                         #",
+    "#      ~                  #",
+    "#      o                  #",
     "###########################",
 ];
 
-var world = new World(plan, legend);
-// for (var i = 0; i < 5; i++) {
-//     console.log(world.toString());
-//     world.turn();
-// }
-/* Animate the world */
-var intID = window.setInterval(tick, 1000, world);
-function tick(world){
-    console.clear();
+window.onload = function() {
+    var world = new World(plan, legend);
+    /* Animate the world */
+    // var intID = window.setInterval(tick, 1000, world);
+
+    // function tick(world) {
+    //     console.clear();
+    //     console.log(world.toString());
+    //     canvas.draw();
+    //     world.turn();
+    // }
     console.log(world.toString());
-    world.turn();
-}
+    world.toCanvas();
+};
