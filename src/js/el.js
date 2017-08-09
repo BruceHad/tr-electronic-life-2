@@ -99,9 +99,9 @@ function Wall() {} // Wall is an empty object, with no act method
 Wall.prototype.draw = function(ctx, v, squareSize) {
     // Draw critter on ctx at vector v
     // Wall is a filled rectangle that almost fills the square
-    var x = v.x * squareSize + 1, 
-        y = v.y * squareSize + 1,
-        width = squareSize - 1;
+    var x = v.x * squareSize + 1.5, 
+        y = v.y * squareSize + 1.5,
+        width = squareSize - 1.5;
     ctx.fillRect(x, y, width, width);
 };
 
@@ -115,17 +115,39 @@ BouncingCritter.prototype.act = function(view) {
         this.direction = view.find(" ") || "s"; // s if no spaces found
     return { type: "move", direction: this.direction };
 };
-BouncingCritter.prototype.draw = function(ctx, v) {
+BouncingCritter.prototype.draw = function(ctx, v, squareSize) {
     // Draw critter on ctx at vector v
-    // console.log(ctx, v);  
+    // This is a small circle.
+    var x = v.x * squareSize + squareSize/2 + 0.5, 
+        y = v.y * squareSize + squareSize/2 + 0.5,
+        width = squareSize/2 - 1;
+    // ctx.strokeRect(v.x * squareSize + 0.5, v.y * squareSize + 0.5, squareSize, squareSize);
+    ctx.beginPath();
+    ctx.arc(x, y, width, 0, Math.PI * 2, true);
+    ctx.stroke();
 };
 
 function WallFollower() {
     this.dir = "s";
 }
-WallFollower.prototype.draw = function(ctx, v) {
+WallFollower.prototype.draw = function(ctx, v, squareSize) {
     // Draw critter on ctx at vector v
-    // console.log(ctx, v);  
+    // This is a small cross
+    var x = v.x * squareSize, 
+        y = v.y * squareSize;
+    // ctx.strokeRect(x + 0.5, y + 0.5, squareSize, squareSize);
+    ctx.beginPath();
+    // Vertical Line
+    ctx.moveTo(x + .5 + squareSize/2, y + 1);
+    ctx.lineTo(x + .5 + squareSize/2, y + squareSize);
+    
+    // Horizontal line
+    ctx.moveTo(x + 1, y + 1.5 + squareSize/2. - 1);
+    ctx.lineTo(x + squareSize, y + 1.5 + squareSize/2. - 1);
+    ctx.stroke();
+    // ctx.moveTo(10, 50);
+    // ctx.lineTo(100, 75);
+    // ctx.fill();
 };
 
 WallFollower.prototype.act = function(view) {
@@ -154,6 +176,10 @@ Canvas.prototype.draw = function(element, vector) {
     //draw element to canvas at vector
     // console.log(element);
     element.draw(this.ctx, vector, this.squareSize);
+};
+
+Canvas.prototype.clear = function(){
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
 /* The World object take the plan and a legend and constructs all the World
@@ -186,6 +212,7 @@ World.prototype.toString = function() {
 };
 
 World.prototype.toCanvas = function(){
+    this.canvas.clear();
     for (var y = 0; y < this.grid.height; y++) {
         for (var x = 0; x < this.grid.width; x++) {
             var vector = new Vector(x, y);
@@ -276,14 +303,13 @@ var plan = [
 window.onload = function() {
     var world = new World(plan, legend);
     /* Animate the world */
-    // var intID = window.setInterval(tick, 1000, world);
-
-    // function tick(world) {
-    //     console.clear();
-    //     console.log(world.toString());
-    //     canvas.draw();
-    //     world.turn();
-    // }
-    console.log(world.toString());
-    world.toCanvas();
+    var intID = window.setInterval(tick, 500, world);
+    function tick(world) {
+        console.clear();
+        console.log(world.toString());
+        world.toCanvas();
+        world.turn();
+    }
+    // console.log(world.toString());
+    // world.toCanvas();
 };
