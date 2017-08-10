@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <meta content="" name="description">
+    <title>{{ title }}</title>
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/electronic-life.css" rel="stylesheet">
+    <link href="images/favicon.png" rel="icon">
+</head>
+
+<body>
+
+    {{> header}}
+
+    <div class='container'>
+        <div class='row'>
+            <div class='col col-md-4'>
+                <p>An implementation of the <a href='http://eloquentjavascript.net/07_elife.html'>Electronic Life</a> project from <i>Eloquent Javascript</i>.</p>
+                <p>Hit F12 (on Firefox at least) to view the output in the Console.</p>
+            </div>
+            <div class='col col-md-8'>
+                <canvas id='canvas'></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{> footer}}
+
+    <script src='scripts/el.js'></script>
+</body>
+
+</html>
