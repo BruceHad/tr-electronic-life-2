@@ -351,8 +351,8 @@ window.onload = function() {
     function tick(world) {
         // Output to console
         if (tickCount === 0) world.turn();
-        // console.clear();
-        // console.log(world.toString());
+        console.clear();
+        console.log(world.toString());
         world.toCanvas(tickCount);
         tickCount += 1;
         if (tickCount === ticksPerMovement) {
