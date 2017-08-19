@@ -42,6 +42,7 @@ function dirPlus(dir, n) {
 function Vector(x, y) {
     this.x = parseInt(x);
     this.y = parseInt(y);
+    this.squareSize = 8; // pixels
 }
 Vector.prototype.plus = function(other) {
     return new Vector(this.x + other.x, this.y + other.y);
@@ -55,19 +56,13 @@ Vector.prototype.plus = function(other) {
 */
 
 
-// function Critter () {
-//     this.position = position; // current position of the object
-//     console.log(this.position);
-// }
-
 function Wall() {} // Wall is an empty object, with no act method
-// Wall.prototype = Object.create(Critter.prototype);
-Wall.prototype.draw = function(ctx, position) {
-    // Draw critter on ctx at vector position
+Wall.prototype.draw = function(ctx, v) {
+    // Draw critter on ctx at vector v
     // Wall is a filled rectangle that almost fills the square
-    let squareSize = 8, 
+    let squareSize = v.squareSize, 
         width = squareSize - 1.5;
-    ctx.fillRect(position.x + 1, position.y + 1, width, width);
+    ctx.fillRect(v.x + 1, v.y + 1, width, width);
 };
 
 function BouncingCritter() {
@@ -83,12 +78,12 @@ BouncingCritter.prototype.act = function(view) {
         this.direction = view.find(" ") || "s"; // s if no spaces found
     return { type: "move", direction: this.direction };
 };
-BouncingCritter.prototype.draw = function(ctx, position) {
+BouncingCritter.prototype.draw = function(ctx, v) {
     // Draw critter on ctx at vector v
     // This is a small circle.
     let squareSize = 8;
-    var x = position.x + squareSize / 2 + 0.5,
-        y = position.y + squareSize / 2 + 0.5,
+    var x = v.x + squareSize / 2 + 0.5,
+        y = v.y + squareSize / 2 + 0.5,
         width = squareSize / 2 - 1;
     // ctx.strokeRect(v.x * squareSize + 0.5, v.y * squareSize + 0.5, squareSize, squareSize);
     ctx.beginPath();
@@ -99,21 +94,19 @@ BouncingCritter.prototype.draw = function(ctx, position) {
 function WallFollower() {
     this.direction = 's';
 }
-WallFollower.prototype.draw = function(ctx, position) {
+WallFollower.prototype.draw = function(ctx, v) {
     // Draw critter on ctx at vector v
     // This is a small cross
-    let squareSize = 8;
-    var x = position.x,
-        y = position.y;
-    // ctx.strokeRect(x + 0.5, y + 0.5, squareSize, squareSize);
+    let x = v.x,
+        y = v.y;
     ctx.beginPath();
     // Vertical Line
-    ctx.moveTo(x + .5 + squareSize / 2, y + 1);
-    ctx.lineTo(x + .5 + squareSize / 2, y + squareSize);
+    ctx.moveTo(x + .5 + v.squareSize / 2, y + 1);
+    ctx.lineTo(x + .5 + v.squareSize / 2, y + v.squareSize);
 
     // Horizontal line
-    ctx.moveTo(x + 1, y + 1.5 + squareSize / 2. - 1);
-    ctx.lineTo(x + squareSize, y + 1.5 + squareSize / 2. - 1);
+    ctx.moveTo(x + 1, y + 1.5 + v.squareSize / 2. - 1);
+    ctx.lineTo(x + v.squareSize, y + 1.5 + v.squareSize / 2. - 1);
     ctx.stroke();
 };
 
@@ -163,11 +156,10 @@ Grid.prototype.forEach = function(f, context) {
  */
 function Canvas(id, height, width) {
     let canvas = document.getElementById(id);
-    this.squareSize = 8;
     this.ctx = canvas.getContext('2d');
 
-    canvas.height = height * this.squareSize;
-    canvas.width = width * this.squareSize;
+    canvas.height = height * 8;
+    canvas.width = width * 8;
 }
 
 Canvas.prototype.draw = function(element, position) {
@@ -304,12 +296,12 @@ var plan = [
     "#    #         o          #",
     "#    #            o       #",
     "#    #####                #",
-    "#              ~          #",
+    "#              +          #",
     "#    #################    #",
     "#                    #    #",
     "#                    #    #",
     "#              #######    #",
-    "#      ~                  #",
+    "#      +                  #",
     "#      o                  #",
     "#                         #",
     "#                         #",
@@ -319,7 +311,7 @@ var plan = [
     "#          #              #",
     "#          #           #  #",
     "#          ######      #  #",
-    "#          #~o       ###  #",
+    "#          #+o       ###  #",
     "#          #########      #",
     "#                  #      #",
     "#                  #      #",
@@ -330,7 +322,7 @@ var plan = [
 
 let legend = {
     "#": Wall,
-    "~": WallFollower,
+    "+": WallFollower,
     "o": BouncingCritter,
 };
 
